@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 
 class TransactionForm extends StatefulWidget {
-  const TransactionForm({super.key, this.category, this.amount, this.date});
+  const TransactionForm({
+    super.key, 
+    this.category, 
+    this.amount, 
+    this.date,
+    this.isExpense, // Tambahkan parameter isExpense
+  });
 
   final String? category; // Kategori transaksi
   final String? amount; // Jumlah transaksi
   final DateTime? date; // Tanggal transaksi
+  final bool? isExpense; // Status expense, nullable
+  
   @override
   State<TransactionForm> createState() => _TransactionFormState();
 }
@@ -25,11 +33,16 @@ class _TransactionFormState extends State<TransactionForm> {
     _amountController.dispose(); // Dispose controller saat widget dihapus
     super.dispose();
   }
+  
   @override
   void initState() {
     super.initState();
     _categoryController.text = widget.category ?? '';
     _amountController.text = widget.amount?.toString() ?? '';
+    
+    // Set default untuk isExpense
+    isExpense = widget.isExpense ?? true; // Gunakan nilai dari widget atau default ke true
+    
     // Hapus pengaturan default untuk _dateController
     if (widget.date != null) {
       _dateController.text =
@@ -197,7 +210,7 @@ class _TransactionFormState extends State<TransactionForm> {
                               'category': category,
                               'amount': amount,
                               'date': date,
-                              'isExpense': isExpense,
+                              'isExpense': isExpense, // Pastikan isExpense selalu dikembalikan
                             });
                           }
                         },
