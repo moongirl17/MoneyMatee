@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:moneymate/pages/transaction_form.dart';
 import 'package:moneymate/pages/transaction_summary.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneymate/theme/theme_cubit.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -10,15 +12,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  // List untuk menyimpan transaksi
   final List<Map<String, dynamic>> _transactions = [];
-  
-  // Variabel untuk menyimpan filter jenis transaksi
-  String _filterType = 'All'; // All, Income, Outcome
+  String _filterType = 'All';
 
   @override
   Widget build(BuildContext context) {
-    // Filter transaksi berdasarkan tipe yang dipilih
     final filteredTransactions = _filterType == 'All'
         ? _transactions
         : _transactions.where((tx) {
@@ -28,12 +26,38 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('MoneyMate'),
+        actions: [
+          // Tombol bulat untuk toggle tema dengan ikon
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Icons.dark_mode
+                        : Icons.light_mode,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color.fromARGB(255, 241, 241, 241)// Light mode color
+                        : const Color.fromARGB(255, 55, 57, 74), // Dark mode color
+                  ),
+                  onPressed: () {
+                    context.read<ThemeCubit>().toggleTheme();
+                  },
+                  iconSize: 30,
+                  padding: EdgeInsets.zero,
+                  splashRadius: 20,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          const SizedBox(height: 30), 
-          TransactionSummary(summarydata: _transactions), //transaction summary
-          const SizedBox(height: 20), 
+          const SizedBox(height: 30),
+          TransactionSummary(summarydata: _transactions),
+          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -60,7 +84,7 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-          const SizedBox(height: 20), 
+          const SizedBox(height: 20),
           Expanded(
             child: filteredTransactions.isEmpty
                 ? const Center(
@@ -143,7 +167,7 @@ class _HomeState extends State<Home> {
                                         ),
                                       ),
                                     );
-                                    
+
                                     if (result != null && result is Map<String, dynamic>) {
                                       setState(() {
                                         _transactions[index] = result;
