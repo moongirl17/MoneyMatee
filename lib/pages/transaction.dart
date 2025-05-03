@@ -1,21 +1,18 @@
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:moneymate/data/app_db.dart';
 import 'package:get_it/get_it.dart';
 import 'package:moneymate/data/transaction_db.dart';
 import 'package:moneymate/pages/transaction_form.dart';
 
-
-class Transaction extends StatefulWidget {
-  const Transaction({super.key});
-
+class TransactionPage extends StatefulWidget {
+  const TransactionPage({super.key});
 
   @override
-  State<Transaction> createState() => _TransactionState();
+  State<TransactionPage> createState() => _TransactionPageState();
 }
 
-class _TransactionState extends State<Transaction> {
-
+class _TransactionPageState extends State<TransactionPage> {
   final db = TransactionDb(GetIt.instance<AppDatabase>());
   final transaction = <TransactionTableData>[];
 
@@ -49,13 +46,15 @@ class _TransactionState extends State<Transaction> {
   Future<void> addProduct({
     String category = '',
     DateTime? date,
-    int amount= 0,
+    int amount = 0,
+    bool isExpense = true,
   }) async {
     try {
-      final transactions = TransactionTableCompanion (
-        date: Value(date ?? DateTime.now()),
-        category: Value(category),
-        amount: Value(amount),
+      final transactions = TransactionTableCompanion(
+        date: drift.Value(date ?? DateTime.now()),
+        category: drift.Value(category),
+        amount: drift.Value(amount),
+        // isExpense: drift.Value(isExpense), // Uncomment jika sudah ada di DB
       );
       await db.addProduct(transactions);
       await getProducts();
@@ -69,16 +68,18 @@ class _TransactionState extends State<Transaction> {
     String category = '',
     DateTime? date,
     int amount = 0,
+    bool isExpense = true,
   }) async {
     try {
       final transactions = TransactionTableCompanion(
-        id: Value(id),
-        category: Value(category),
-        date: Value(date ?? DateTime.now()),
-        amount: Value(amount),
+        id: drift.Value(id),
+        category: drift.Value(category),
+        date: drift.Value(date ?? DateTime.now()),
+        amount: drift.Value(amount),
+        // isExpense: drift.Value(isExpense), // Uncomment jika sudah ada di DB
       );
       await db.updateProduct(transactions);
-      await getProducts(); // Refresh data setelah update
+      await getProducts();
     } catch (e) {
       print(e);
     }
@@ -88,7 +89,7 @@ class _TransactionState extends State<Transaction> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Transaction"),
+        title: const Text("Transaction"),
         actions: [
           IconButton(
             onPressed: () async {
@@ -98,70 +99,104 @@ class _TransactionState extends State<Transaction> {
                   builder: (context) => TransactionForm(),
                 ),
               );
-              if(result != null) {
+              if (result != null) {
                 addProduct(
-                  category: result['category'], 
+                  category: result['category'],
                   date: result['date'],
-                  amount: result['amount'],
-                 
+                  amount: result['amount'].toInt(),
+                  isExpense: result['isExpense'] ?? true,
                 );
               }
             },
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
           )
         ],
       ),
       body: ListView.separated(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         itemCount: transaction.length,
-        separatorBuilder: (_, __) => SizedBox(height: 16), 
-        itemBuilder: (_, index) => Card(
-          child: ListTile(
-            title: Text(transaction[index].category),
-            subtitle: Text(transaction[index].amount.toString()),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () async {
-                    print('Editing transaction: ${transaction[index]}');
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionForm(
-                          category: transaction[index].category,
-                          date: transaction[index].date,
-                          amount: transaction[index].amount.toInt().toString(),
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (_, index) {
+          // Default sementara karena isExpense belum dari DB
+          bool isExpense = true;
+
+          return Card(
+            child: ListTile(
+              leading: Icon(
+                Icons.account_balance_wallet,
+                color: isExpense ? Colors.red : Colors.green,
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction[index].category,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${isExpense ? "-" : "+"} Rp${transaction[index].amount}',
+                    style: TextStyle(
+                      color: isExpense ? Colors.red : Colors.green,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '${transaction[index].date.day}/${transaction[index].date.month}/${transaction[index].date.year}',
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionForm(
+                            category: transaction[index].category,
+                            date: transaction[index].date,
+                            amount: transaction[index].amount.toString(),
+                            isExpense: isExpense,
+                          ),
                         ),
-                      ),
-                    );
-                    if (result != null) {
-                      print('Edited data: $result');
-                      editProduct(
-                        id: transaction[index].id,
-                        category: result['category'],
-                        date: result['date'],
-                        amount: int.parse(result['amount']),
                       );
-                    }
-                  },
-                  icon: Icon(Icons.edit),
-                ),
-                IconButton(
-                  onPressed: () {
-                    delete(transaction[index].id);
-                  },
-                  icon: Icon(Icons.delete),
-                ),
-              ],
-            )
-          ),
-        ), 
+                      if (result != null) {
+                        editProduct(
+                          id: transaction[index].id,
+                          category: result['category'],
+                          date: result['date'],
+                          amount: int.parse(result['amount'].toString()),
+                          isExpense: result['isExpense'] ?? true,
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.edit),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      delete(transaction[index].id);
+                    },
+                    icon: const Icon(Icons.delete),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 }
-
-
-
-
