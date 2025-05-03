@@ -15,12 +15,20 @@ class TransactionSummary extends StatelessWidget {
         .where((tx) => tx['isExpense'] == true)
         .fold(0.0, (sum, tx) => sum + tx['amount']);
 
+    // Menentukan warna background berdasarkan tema (dark/light mode)
+    Color backgroundColor;
+    if (Theme.of(context).brightness == Brightness.dark) {
+      backgroundColor = const Color.fromARGB(255, 55, 57, 74); // Dark mode color
+    } else {
+      backgroundColor = const Color.fromARGB(255, 194, 166, 249); // Light mode color
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 55, 57, 74),
+          color: backgroundColor,  // Menggunakan warna sesuai tema
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -44,7 +52,7 @@ class TransactionSummary extends StatelessWidget {
                   children: [
                     const Text('Income',
                         style: TextStyle(
-                            color: Color.fromARGB(255, 194, 166, 249),
+                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
@@ -76,7 +84,7 @@ class TransactionSummary extends StatelessWidget {
                   children: [
                     const Text('Outcome',
                         style: TextStyle(
-                            color: Color.fromARGB(255, 194, 166, 249),
+                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
