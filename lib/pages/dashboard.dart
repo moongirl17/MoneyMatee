@@ -1,12 +1,11 @@
 import 'package:calendar_appbar/calendar_appbar.dart';
 import 'package:flutter/material.dart';
-import 'package:moneymate/pages//transaction_chart_section.dart';
-import 'package:moneymate/pages//transaction_analysis.dart';
-import 'package:moneymate/pages//category_pie_chart.dart';
+import 'package:moneymate/pages/transaction_chart_section.dart';
+import 'package:moneymate/pages/transaction_analysis.dart';
+import 'package:moneymate/pages/category_pie_chart.dart';
 import 'package:moneymate/pages/transaction_form.dart';
 import 'package:moneymate/pages/home.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:moneymate/theme/theme_cubit.dart';
+import 'package:intl/intl.dart';
 
 class DashboardPage extends StatefulWidget {
   final List<Map<String, dynamic>> transactions;
@@ -45,6 +44,12 @@ class _DashboardPageState extends State<DashboardPage> {
         _selectedIndex = index;
       });
     }
+  }
+
+  // Helper method to format the amount with thousand separator
+  String formatAmount(double amount) {
+    final formatter = NumberFormat('#,##0.00', 'en_US');
+    return formatter.format(amount);
   }
 
   @override
@@ -201,12 +206,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-
-
   List<Map<String, dynamic>> _processCategoryData() {
     // Filter transactions based on the selected date
     final filteredTransactions = _transactions.where((transaction) {
-      final transactionDate = DateTime.parse(transaction['date']);
+      final transactionDate = transaction['date'] is DateTime
+          ? transaction['date'] as DateTime // Directly use DateTime if it's already DateTime
+          : DateTime.parse(transaction['date']); // Parse it if it's a String
+
       return transactionDate.year == selectedDate.year &&
              transactionDate.month == selectedDate.month;
     }).toList();
@@ -228,6 +234,4 @@ class _DashboardPageState extends State<DashboardPage> {
       return {'category': entry.key, 'total': entry.value};
     }).toList();
   }
-  
 }
-
