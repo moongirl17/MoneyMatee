@@ -19,7 +19,7 @@ class TransactionForm extends StatefulWidget {
 }
 
 class _TransactionFormState extends State<TransactionForm> {
-  bool _isExpense = true; // Hindari konflik nama
+  bool _isExpense = true;
   final TextEditingController _categoryController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
@@ -49,11 +49,28 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Add Transaction",
-          style: TextStyle(color: Colors.white, fontSize: 20),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Add Transaction",
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+                fontSize: 20,
+              ),
+            ),
+            Text(
+              'No transactions yet!',
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
@@ -82,7 +99,7 @@ class _TransactionFormState extends State<TransactionForm> {
                       ),
                       Text(
                         _isExpense ? 'Expense' : 'Income',
-                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 14),
                       ),
                     ],
                   ),
@@ -93,17 +110,17 @@ class _TransactionFormState extends State<TransactionForm> {
                   child: TextFormField(
                     controller: _amountController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                    decoration: InputDecoration(
                       labelText: 'Amount',
-                      labelStyle: TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: isDark ? Colors.white : Colors.black),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
                       ),
                     ),
                     validator: (value) {
@@ -123,17 +140,17 @@ class _TransactionFormState extends State<TransactionForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextFormField(
                     controller: _categoryController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                    decoration: InputDecoration(
                       labelText: 'Category',
-                      labelStyle: TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: isDark ? Colors.white : Colors.black),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
                       ),
                     ),
                     validator: (value) {
@@ -165,21 +182,21 @@ class _TransactionFormState extends State<TransactionForm> {
                         });
                       }
                     },
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                    decoration: InputDecoration(
                       labelText: 'Enter Date',
-                      labelStyle: TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: isDark ? Colors.white : Colors.black),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
                       ),
                       suffixIcon: Icon(
                         Icons.calendar_today,
-                        color: Colors.white,
+                        color: isDark ? Colors.white : Colors.black,
                         size: 18,
                       ),
                     ),
@@ -223,6 +240,7 @@ class _TransactionFormState extends State<TransactionForm> {
                           'Save',
                           style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
+                        
                       ),
                     ),
                   ),

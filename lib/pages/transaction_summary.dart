@@ -18,7 +18,7 @@ class TransactionSummary extends StatelessWidget {
     // Menentukan warna background berdasarkan tema (dark/light mode)
     Color backgroundColor;
     if (Theme.of(context).brightness == Brightness.dark) {
-      backgroundColor = const Color.fromARGB(255, 55, 57, 74); // Dark mode color
+      backgroundColor = const Color.fromARGB(255, 194, 166, 249); // Dark mode color
     } else {
       backgroundColor = const Color.fromARGB(255, 194, 166, 249); // Light mode color
     }

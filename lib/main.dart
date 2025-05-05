@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:moneymate/pages/dashboard.dart';
 import 'package:moneymate/theme/theme_cubit.dart';
 import 'package:moneymate/theme/theme_localstorage.dart';
 import 'package:moneymate/injector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
-import 'package:moneymate/pages/home.dart';
+
 // import 'package:flutter_app/Tugas_1/register.dart'; // Import halaman register
 // import 'package:flutter_app/Tugas_1/login.dart'; // Import halaman login
 // import 'package:flutter_app/day-3/home.dart';
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
             darkTheme: ThemeData.dark(),
             // routes: routes,
             // initialRoute: AppRoutes.home,
-           home: const Home(),
+           home: const DashboardPage(transactions: [],),
             
           );
         }
