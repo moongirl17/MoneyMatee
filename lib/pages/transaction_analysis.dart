@@ -69,7 +69,7 @@ class _TransactionAnalysisChartState extends State<TransactionAnalysisChart> {
     );
   }
 
-  
+  // Widget to display the bottom titles (dates)
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
   const style = TextStyle(
     fontWeight: FontWeight.bold,
