@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moneymate/pages/dashboard.dart';
 import 'package:moneymate/pages/transaction_form.dart';
 import 'package:moneymate/pages/transaction_summary.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,9 +15,29 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final List<Map<String, dynamic>> _transactions = [];
   String _filterType = 'All';
+  int _selectedIndex = 0; // Set to Home tab initially
+
+  void _onItemTapped(int index) {
+    if (index == 1 && _selectedIndex != index) {
+      // Navigate to Dashboard page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => DashboardPage(transactions: _transactions)),
+      );
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Get theme colors for text and icons based on current brightness
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
+    final iconColor = isDarkMode ? Colors.white : const Color.fromARGB(255, 55, 57, 74);
+    
     final filteredTransactions = _filterType == 'All'
         ? _transactions
         : _transactions.where((tx) {
@@ -27,19 +48,15 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: const Text('MoneyMate'),
         actions: [
-          // Tombol bulat untuk toggle tema dengan ikon
+          // Theme toggle button with proper icon color
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
                 IconButton(
                   icon: Icon(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Icons.dark_mode
-                        : Icons.light_mode,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color.fromARGB(255, 241, 241, 241)// Light mode color
-                        : const Color.fromARGB(255, 55, 57, 74), // Dark mode color
+                    isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                    color: iconColor,
                   ),
                   onPressed: () {
                     context.read<ThemeCubit>().toggleTheme();
@@ -63,12 +80,15 @@ class _HomeState extends State<Home> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Transaction History',
-                  style: TextStyle(fontSize: 24, color: Colors.white),
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: textColor,
+                  ),
                 ),
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.filter_alt, color: Colors.white),
+                  icon: Icon(Icons.filter_alt, color: iconColor),
                   color: const Color.fromARGB(255, 55, 57, 74),
                   onSelected: (value) {
                     setState(() {
@@ -87,10 +107,13 @@ class _HomeState extends State<Home> {
           const SizedBox(height: 20),
           Expanded(
             child: filteredTransactions.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'No transactions yet!',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: textColor,
+                      ),
                     ),
                   )
                 : ListView.builder(
@@ -224,13 +247,16 @@ class _HomeState extends State<Home> {
         child: BottomNavigationBar(
           backgroundColor: const Color.fromARGB(255, 55, 57, 74),
           selectedItemColor: const Color.fromARGB(255, 194, 166, 249),
+          unselectedItemColor: isDarkMode ? Colors.white60 : Colors.white60,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home, color: Color.fromARGB(255, 149, 150, 161)),
+              icon: Icon(Icons.home),
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard, color: Color.fromARGB(255, 149, 150, 161)),
+              icon: Icon(Icons.dashboard),
               label: 'Dashboard',
             ),
           ],
