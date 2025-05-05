@@ -83,6 +83,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     // Get theme colors for text and icons based on current brightness
+    final filteredTransactions = getCategoryFilteredTransactions();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkMode ? Colors.white : Colors.black;
     final labelColor = isDarkMode ? Colors.white : Colors.black;
@@ -138,7 +139,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ),
                       SizedBox(
-                        height: 300,
+                        height: 200,
                         child: TransactionAnalysisChart(
                           transactions: _transactions,
                         ),
@@ -265,8 +266,8 @@ class _DashboardPageState extends State<DashboardPage> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard),
-              label: 'Dashboard',
+              icon: Icon(Icons.analytics),
+              label: 'Analytics',
             ),
           ],
         ),
