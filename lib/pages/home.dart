@@ -4,6 +4,7 @@ import 'package:moneymate/pages/transaction_form.dart';
 import 'package:moneymate/pages/transaction_summary.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneymate/theme/theme_cubit.dart';
+import 'package:intl/intl.dart'; // Tambahkan untuk format ribuan
 
 class Home extends StatefulWidget {
   final List<Map<String, dynamic>>? initialTransactions;
@@ -17,12 +18,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   late List<Map<String, dynamic>> _transactions;
   String _filterType = 'All';
-  int _selectedIndex = 0; // Set to Home tab initially
+  int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    // Initialize transactions from the passed list or create a new empty list
     _transactions = widget.initialTransactions != null 
         ? List.from(widget.initialTransactions!) 
         : [];
@@ -30,7 +30,6 @@ class _HomeState extends State<Home> {
 
   void _onItemTapped(int index) {
     if (index == 1 && _selectedIndex != index) {
-      // Navigate to Dashboard page with updated transactions
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => DashboardPage(transactions: _transactions)),
@@ -44,11 +43,11 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    // Get theme colors for text and icons based on current brightness
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkMode ? Colors.white : Colors.black;
     final iconColor = isDarkMode ? Colors.white : const Color.fromARGB(255, 55, 57, 74);
-    
+    final formatCurrency = NumberFormat("#,##0", "id_ID");
+
     final filteredTransactions = _filterType == 'All'
         ? _transactions
         : _transactions.where((tx) {
@@ -59,7 +58,6 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: const Text('MoneyMate'),
         actions: [
-          // Theme toggle button with proper icon color
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -93,10 +91,7 @@ class _HomeState extends State<Home> {
               children: [
                 Text(
                   'Transaction History',
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: textColor,
-                  ),
+                  style: TextStyle(fontSize: 24, color: textColor),
                 ),
                 PopupMenuButton<String>(
                   icon: Icon(Icons.filter_alt, color: iconColor),
@@ -121,10 +116,7 @@ class _HomeState extends State<Home> {
                 ? Center(
                     child: Text(
                       'No transactions yet!',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: textColor,
-                      ),
+                      style: TextStyle(fontSize: 24, color: textColor),
                     ),
                   )
                 : ListView.builder(
@@ -165,7 +157,7 @@ class _HomeState extends State<Home> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${transaction['isExpense'] ? "-" : "+"} Rp.${transaction['amount'].toStringAsFixed(0)}',
+                                  '${transaction['isExpense'] ? "-" : "+"} Rp.${formatCurrency.format(transaction['amount'])}',
                                   style: TextStyle(
                                     color: transaction['isExpense'] ? Colors.red : Colors.green,
                                     fontWeight: FontWeight.bold,
@@ -204,7 +196,6 @@ class _HomeState extends State<Home> {
 
                                     if (result != null && result is Map<String, dynamic>) {
                                       setState(() {
-                                        // Find and update the actual transaction in the main list
                                         final originalIndex = _transactions.indexOf(transaction);
                                         if (originalIndex != -1) {
                                           _transactions[originalIndex] = result;
@@ -217,7 +208,6 @@ class _HomeState extends State<Home> {
                                   icon: const Icon(Icons.delete, color: Colors.white, size: 20),
                                   onPressed: () {
                                     setState(() {
-                                      // Remove from the main transactions list
                                       _transactions.remove(transaction);
                                     });
                                   },
@@ -236,9 +226,7 @@ class _HomeState extends State<Home> {
         onPressed: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const TransactionForm(),
-            ),
+            MaterialPageRoute(builder: (context) => const TransactionForm()),
           );
 
           if (result != null && result is Map<String, dynamic>) {
