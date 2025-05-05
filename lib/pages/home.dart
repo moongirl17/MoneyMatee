@@ -260,8 +260,8 @@ class _HomeState extends State<Home> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard),
-              label: 'Dashboard',
+              icon: Icon(Icons.analytics),
+              label: 'Analytics',
             ),
           ],
         ),
