@@ -9,7 +9,7 @@ class TransactionChartSection extends StatelessWidget {
     super.key, 
     required this.transactions,
     required this.selectedDate,
-    required this.chart,
+    required this.chart, required bool showExpensePieChart,
   });
 
   @override
