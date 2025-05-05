@@ -1,104 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TransactionSummary extends StatelessWidget {
   final List<Map<String, dynamic>> summarydata;
 
-  const TransactionSummary({super.key, required this.summarydata});
+  const TransactionSummary({
+    Key? key,
+    required this.summarydata,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final totalIncome = summarydata
-        .where((tx) => tx['isExpense'] == false)
-        .fold(0.0, (sum, tx) => sum + tx['amount']);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final totalExpense = summarydata
-        .where((tx) => tx['isExpense'] == true)
-        .fold(0.0, (sum, tx) => sum + tx['amount']);
+    // Hitung total income dan expense
+    double totalIncome = 0;
+    double totalExpense = 0;
 
-    // Menentukan warna background berdasarkan tema (dark/light mode)
-    Color backgroundColor;
-    if (Theme.of(context).brightness == Brightness.dark) {
-      backgroundColor = const Color.fromARGB(255, 194, 166, 249); // Dark mode color
-    } else {
-      backgroundColor = const Color.fromARGB(255, 194, 166, 249); // Light mode color
+    for (var transaction in summarydata) {
+      if (transaction['isExpense'] == true) {
+        totalExpense += transaction['amount'];
+      } else {
+        totalIncome += transaction['amount'];
+      }
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: backgroundColor,  // Menggunakan warna sesuai tema
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Income Section
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(Icons.account_balance_wallet,
-                      color: Colors.green, size: 15),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Income',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text('Rp. ${totalIncome.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ],
-            ),
+    double balance = totalIncome - totalExpense;
 
-            // Outcome Section
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(Icons.account_balance_wallet,
-                      color: Colors.red, size: 15),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Outcome',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text('Rp. ${totalExpense.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ],
+    // Formatter angka: Rp dengan pemisah ribuan titik
+    final numberFormat = NumberFormat.decimalPattern('id_ID');
+    String formatWithRp(num value) => 'Rp${numberFormat.format(value)}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Financial Overview',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildSummaryCard(
+                context,
+                'Income',
+                formatWithRp(totalIncome),
+                Colors.green,
+              ),
+              _buildSummaryCard(
+                context,
+                'Expense',
+                formatWithRp(totalExpense),
+                Colors.red,
+              ),
+              _buildSummaryCard(
+                context,
+                'Balance',
+                formatWithRp(balance),
+                balance >= 0 ? Colors.blue : Colors.orange,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(
+    BuildContext context,
+    String title,
+    String amount,
+    Color color,
+  ) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.28,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 55, 57, 74),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            amount,
+            style: TextStyle(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
