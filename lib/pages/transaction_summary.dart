@@ -5,15 +5,12 @@ class TransactionSummary extends StatelessWidget {
   final List<Map<String, dynamic>> summarydata;
 
   const TransactionSummary({
-    Key? key,
+    super.key,
     required this.summarydata,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    // Hitung total income dan expense
     double totalIncome = 0;
     double totalExpense = 0;
 
@@ -27,87 +24,100 @@ class TransactionSummary extends StatelessWidget {
 
     double balance = totalIncome - totalExpense;
 
-    // Formatter angka: Rp dengan pemisah ribuan titik
     final numberFormat = NumberFormat.decimalPattern('id_ID');
     String formatWithRp(num value) => 'Rp${numberFormat.format(value)}';
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      margin: const EdgeInsets.symmetric(horizontal: 16), 
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      decoration: BoxDecoration(
+        color:  Color.fromARGB(255, 194, 166, 249), 
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Financial Overview',
+          // Balance
+          const Text(
+            'Balance',
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white : Colors.black,
+              fontSize: 16,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildSummaryCard(
-                context,
-                'Income',
-                formatWithRp(totalIncome),
-                Colors.green,
-              ),
-              _buildSummaryCard(
-                context,
-                'Expense',
-                formatWithRp(totalExpense),
-                Colors.red,
-              ),
-              _buildSummaryCard(
-                context,
-                'Balance',
-                formatWithRp(balance),
-                balance >= 0 ? Colors.blue : Colors.orange,
-              ),
-            ],
+          const SizedBox(height: 8),
+          Text(
+            formatWithRp(balance),
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Income & Expense in one decorated row
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            decoration: BoxDecoration( 
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                _buildAmountRow(
+                  icon: Icons.arrow_upward,
+                  title: 'Income',
+                  amount: formatWithRp(totalIncome),
+                  iconColor: Colors.green,
+                ),
+                const SizedBox(width: 32), // Spasi antara income dan expense
+                _buildAmountRow(
+                  icon: Icons.arrow_downward,
+                  title: 'Expense',
+                  amount: formatWithRp(totalExpense),
+                  iconColor: Colors.red,
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryCard(
-    BuildContext context,
-    String title,
-    String amount,
-    Color color,
-  ) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.28,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 55, 57, 74),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
+  Widget _buildAmountRow({
+    required IconData icon,
+    required String title,
+    required String amount,
+    required Color iconColor,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, color: iconColor, size: 18),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.white,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            amount,
-            style: TextStyle(
-              color: color,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 4),
+            Text(
+              amount,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }
