@@ -6,20 +6,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneymate/theme/theme_cubit.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final List<Map<String, dynamic>>? initialTransactions;
+  
+  const Home({super.key, this.initialTransactions});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  final List<Map<String, dynamic>> _transactions = [];
+  late List<Map<String, dynamic>> _transactions;
   String _filterType = 'All';
   int _selectedIndex = 0; // Set to Home tab initially
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize transactions from the passed list or create a new empty list
+    _transactions = widget.initialTransactions != null 
+        ? List.from(widget.initialTransactions!) 
+        : [];
+  }
+
   void _onItemTapped(int index) {
     if (index == 1 && _selectedIndex != index) {
-      // Navigate to Dashboard page
+      // Navigate to Dashboard page with updated transactions
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => DashboardPage(transactions: _transactions)),
@@ -193,7 +204,11 @@ class _HomeState extends State<Home> {
 
                                     if (result != null && result is Map<String, dynamic>) {
                                       setState(() {
-                                        _transactions[index] = result;
+                                        // Find and update the actual transaction in the main list
+                                        final originalIndex = _transactions.indexOf(transaction);
+                                        if (originalIndex != -1) {
+                                          _transactions[originalIndex] = result;
+                                        }
                                       });
                                     }
                                   },
@@ -202,7 +217,8 @@ class _HomeState extends State<Home> {
                                   icon: const Icon(Icons.delete, color: Colors.white, size: 20),
                                   onPressed: () {
                                     setState(() {
-                                      _transactions.removeAt(index);
+                                      // Remove from the main transactions list
+                                      _transactions.remove(transaction);
                                     });
                                   },
                                 ),

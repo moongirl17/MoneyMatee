@@ -24,13 +24,21 @@ class _DashboardPageState extends State<DashboardPage> {
   DateTime selectedDate = DateTime.now();
   bool showExpensePieChart = true;
   int _selectedIndex = 1; // Set to Dashboard tab initially 
+  late List<Map<String, dynamic>> _transactions;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create a copy of the transactions list to work with
+    _transactions = List.from(widget.transactions);
+  }
 
   void _onItemTapped(int index) {
     if (index == 0 && _selectedIndex != index) {
-      // Navigate to Home page
+      // Navigate to Home page with updated transactions
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Home()),
+        MaterialPageRoute(builder: (context) => Home(initialTransactions: _transactions)),
       );
     } else {
       setState(() {
@@ -66,10 +74,10 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             // Line chart section
             TransactionChartSection(
-              transactions: widget.transactions,
+              transactions: _transactions,
               selectedDate: selectedDate,
               chart: TransactionAnalysisChart(
-                transactions: widget.transactions,
+                transactions: _transactions,
               ),
             ),
             
@@ -132,7 +140,7 @@ class _DashboardPageState extends State<DashboardPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: CategoryPieChart(
-                transactions: widget.transactions,
+                transactions: _transactions,
                 showExpenses: showExpensePieChart,
               ),
             ),
@@ -148,11 +156,12 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           );
 
-          // Note: The result handling would typically update transactions,
-          // but we would need a way to pass this back to the Home page as well
           if (result != null && result is Map<String, dynamic>) {
-            // You would need a state management solution to properly handle this
-            // For now, we'll just show that the form was submitted successfully
+            setState(() {
+              _transactions.add(result);
+            });
+            
+            // Show success message
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Transaction added successfully')),
             );
@@ -191,4 +200,34 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
+
+
+
+  List<Map<String, dynamic>> _processCategoryData() {
+    // Filter transactions based on the selected date
+    final filteredTransactions = _transactions.where((transaction) {
+      final transactionDate = DateTime.parse(transaction['date']);
+      return transactionDate.year == selectedDate.year &&
+             transactionDate.month == selectedDate.month;
+    }).toList();
+
+    // Group transactions by category and calculate total amount for each category
+    final Map<String, double> categoryTotals = {};
+    for (var transaction in filteredTransactions) {
+      final category = transaction['category'];
+      final amount = transaction['amount'];
+      if (categoryTotals.containsKey(category)) {
+        categoryTotals[category] = categoryTotals[category]! + amount;
+      } else {
+        categoryTotals[category] = amount;
+      }
+    }
+
+    // Convert to a list of maps for easier processing in the pie chart
+    return categoryTotals.entries.map((entry) {
+      return {'category': entry.key, 'total': entry.value};
+    }).toList();
+  }
+  
 }
+
